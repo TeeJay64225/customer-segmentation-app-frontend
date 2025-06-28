@@ -1,3 +1,4 @@
+// src/components/Layout.jsx
 import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -35,11 +36,11 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 260;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/app/dashboard' },
-  { text: 'Segments', icon: <People />, path: '/app/segments' },
-  { text: 'Campaigns', icon: <Campaign />, path: '/app/campaigns' },
-  { text: 'Analytics', icon: <Analytics />, path: '/app/analytics' },
-  { text: 'Payments', icon: <Payment />, path: '/app/payments' },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
+  { text: 'Segments', icon: <People />, path: '/segments' },
+  { text: 'Campaigns', icon: <Campaign />, path: '/campaigns' },
+  { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
+  { text: 'Payments', icon: <Payment />, path: '/payments' },
 ];
 
 export default function Layout() {
@@ -64,8 +65,16 @@ export default function Layout() {
   };
 
   const handleLogout = () => {
+    console.log('👋 User logging out');
     logout();
     handleProfileMenuClose();
+    navigate('/login', { replace: true });
+  };
+
+  const handleNavigation = (path) => {
+    console.log('🧭 Navigating to:', path);
+    navigate(path);
+    if (isMobile) setMobileOpen(false);
   };
 
   const drawer = (
@@ -81,10 +90,7 @@ export default function Layout() {
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
-              onClick={() => {
-                navigate(item.path);
-                if (isMobile) setMobileOpen(false);
-              }}
+              onClick={() => handleNavigation(item.path)}
               sx={{
                 mx: 1,
                 mb: 0.5,
@@ -137,7 +143,7 @@ export default function Layout() {
           </Typography>
           <Box display="flex" alignItems="center">
             <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
-              Welcome, {user?.firstName || 'User'}
+              Welcome, {user?.firstName}
             </Typography>
             <IconButton
               size="large"
@@ -149,7 +155,7 @@ export default function Layout() {
               color="inherit"
             >
               <Avatar sx={{ width: 36, height: 36, bgcolor: 'secondary.main' }}>
-                {user?.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.firstName?.charAt(0)?.toUpperCase()}
               </Avatar>
             </IconButton>
           </Box>

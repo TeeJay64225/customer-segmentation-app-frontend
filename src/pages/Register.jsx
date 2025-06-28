@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/pages/Register.jsx
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -34,8 +35,16 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('✅ User already authenticated, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -73,11 +82,13 @@ export default function Register() {
       return;
     }
 
+    console.log('📝 Attempting registration...');
     const { confirmPassword, ...userData } = formData;
     const result = await register(userData);
     
     if (result.success) {
-      navigate('/dashboard');
+      console.log('✅ Registration successful, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
     } else {
       setError(result.message);
     }

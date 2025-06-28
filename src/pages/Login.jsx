@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/pages/Login.jsx
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -23,15 +24,23 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('✅ User already authenticated, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
-    if (error) setError('');
+    if (error) setError(''); // Clear error when user starts typing
   };
 
   const handleSubmit = async (e) => {
@@ -45,10 +54,12 @@ export default function Login() {
       return;
     }
 
+    console.log('🔐 Attempting login...');
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      navigate('/dashboard');
+      console.log('✅ Login successful, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
     } else {
       setError(result.message);
     }

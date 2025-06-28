@@ -1,3 +1,4 @@
+// src/App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -41,7 +42,7 @@ const ProtectedRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
   
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ children }) => {
@@ -51,22 +52,8 @@ const PublicRoute = ({ children }) => {
     return <LoadingSpinner />;
   }
   
-  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
-};
-
-// Landing page component
-const LandingPage = () => {
-  const { isAuthenticated, loading } = useAuth();
-  
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-  
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" />;
-  }
-  
-  return <Navigate to="/login" />;
+  // If user is authenticated, redirect to dashboard
+  return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
 };
 
 function App() {
@@ -76,8 +63,15 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            {/* Root route */}
-            <Route path="/" element={<LandingPage />} />
+            {/* Root route - redirect based on auth status */}
+            <Route 
+              path="/" 
+              element={
+                <PublicRoute>
+                  <Navigate to="/login" replace />
+                </PublicRoute>
+              } 
+            />
             
             {/* Public Routes */}
             <Route
@@ -99,14 +93,13 @@ function App() {
             
             {/* Protected Routes */}
             <Route
-              path="/app"
+              path="/"
               element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Navigate to="/app/dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="segments" element={<Segments />} />
               <Route path="campaigns" element={<Campaigns />} />
@@ -115,7 +108,7 @@ function App() {
             </Route>
             
             {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>
       </AuthProvider>
