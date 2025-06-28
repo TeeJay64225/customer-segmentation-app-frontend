@@ -54,6 +54,21 @@ const PublicRoute = ({ children }) => {
   return !isAuthenticated ? children : <Navigate to="/dashboard" />;
 };
 
+// Landing page component
+const LandingPage = () => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" />;
+  }
+  
+  return <Navigate to="/login" />;
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -61,6 +76,9 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
+            {/* Root route */}
+            <Route path="/" element={<LandingPage />} />
+            
             {/* Public Routes */}
             <Route
               path="/login"
@@ -81,20 +99,23 @@ function App() {
             
             {/* Protected Routes */}
             <Route
-              path="/"
+              path="/app"
               element={
                 <ProtectedRoute>
                   <Layout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Navigate to="/dashboard" />} />
+              <Route index element={<Navigate to="/app/dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="segments" element={<Segments />} />
               <Route path="campaigns" element={<Campaigns />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="payments" element={<Payments />} />
             </Route>
+            
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Router>
       </AuthProvider>

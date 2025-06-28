@@ -35,11 +35,11 @@ import { useAuth } from '../context/AuthContext';
 const drawerWidth = 260;
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
-  { text: 'Segments', icon: <People />, path: '/segments' },
-  { text: 'Campaigns', icon: <Campaign />, path: '/campaigns' },
-  { text: 'Analytics', icon: <Analytics />, path: '/analytics' },
-  { text: 'Payments', icon: <Payment />, path: '/payments' },
+  { text: 'Dashboard', icon: <Dashboard />, path: '/app/dashboard' },
+  { text: 'Segments', icon: <People />, path: '/app/segments' },
+  { text: 'Campaigns', icon: <Campaign />, path: '/app/campaigns' },
+  { text: 'Analytics', icon: <Analytics />, path: '/app/analytics' },
+  { text: 'Payments', icon: <Payment />, path: '/app/payments' },
 ];
 
 export default function Layout() {

@@ -8,19 +8,22 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
-    minify: true
-  },
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-        secure: false,
+    minify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          mui: ['@mui/material', '@emotion/react', '@emotion/styled']
+        }
       }
     }
   },
-  define: {
-    global: 'globalThis',
+  server: {
+    port: 5173,
+    host: true
   },
+  preview: {
+    port: 4173,
+    host: true
+  }
 })
