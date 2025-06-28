@@ -1,60 +1,105 @@
-// src/services/api.js
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://customer-segmentation-app-backend.onrender.com/api';
+// Import components
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Segments from './pages/Segments';
+import Campaigns from './pages/Campaigns';
+import Analytics from './pages/Analytics';
+import Payments from './pages/Payments';
+import Layout from './components/Layout';
+import LoadingSpinner from './components/LoadingSpinner';
 
-console.log('🌐 API Base URL:', API_BASE_URL); // Debug log
-
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff',
+    },
   },
-  timeout: 60000, // 60 seconds for Render cold starts
-  withCredentials: false, // Set to false for CORS
+  typography: {
+    fontFamily: 'Roboto, Arial, sans-serif',
+  },
 });
 
-// Request interceptor to add auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    console.log('📤 API Request:', config.method?.toUpperCase(), config.url, config.data);
-    return config;
-  },
-  (error) => {
-    console.error('📤 Request Error:', error);
-    return Promise.reject(error);
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
   }
-);
+  
+  return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
-// Response interceptor for error handling
-api.interceptors.response.use(
-  (response) => {
-    console.log('📥 API Response:', response.status, response.config.url, response.data);
-    return response;
-  },
-  (error) => {
-    console.error('📥 Response Error:', {
-      status: error.response?.status,
-      url: error.config?.url,
-      message: error.response?.data?.message || error.message,
-      data: error.response?.data
-    });
-
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // Don't redirect if we're already on login/register pages
-      if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
   }
-);
+  
+  return !isAuthenticated ? children : <Navigate to="/dashboard" />;
+};
 
-export default api;
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <PublicRoute>
+                  <Register />
+                </PublicRoute>
+              }
+            />
+            
+            {/* Protected Routes */}
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="/dashboard" />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="segments" element={<Segments />} />
+              <Route path="campaigns" element={<Campaigns />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="payments" element={<Payments />} />
+            </Route>
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;
