@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.VITE_BASE_PATH || "/customer-segmentation-app-frontend",
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
