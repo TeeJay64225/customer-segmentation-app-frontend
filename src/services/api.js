@@ -4,6 +4,7 @@ import axios from 'axios';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://customer-segmentation-app-backend.onrender.com/api';
 
 console.log('🌐 API Base URL:', API_BASE_URL); // Debug log
+console.log('🔧 Environment:', import.meta.env.MODE); // Debug log
 
 // Create axios instance
 const api = axios.create({
@@ -12,7 +13,7 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 60000, // 60 seconds for Render cold starts
-  withCredentials: false, // Set to false for CORS
+  withCredentials: false, // Important for CORS
 });
 
 // Request interceptor to add auth token
@@ -22,7 +23,19 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('📤 API Request:', config.method?.toUpperCase(), config.url, config.data);
+    
+    // Add origin header
+    config.headers.Origin = window.location.origin;
+    
+    console.log('📤 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: config.baseURL + config.url,
+      headers: config.headers,
+      data: config.data
+    });
+    
     return config;
   },
   (error) => {
@@ -34,7 +47,11 @@ api.interceptors.request.use(
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => {
-    console.log('📥 API Response:', response.status, response.config.url, response.data);
+    console.log('📥 API Response:', {
+      status: response.status,
+      url: response.config.url,
+      data: response.data
+    });
     return response;
   },
   (error) => {
@@ -42,7 +59,8 @@ api.interceptors.response.use(
       status: error.response?.status,
       url: error.config?.url,
       message: error.response?.data?.message || error.message,
-      data: error.response?.data
+      data: error.response?.data,
+      fullError: error
     });
 
     if (error.response?.status === 401) {
